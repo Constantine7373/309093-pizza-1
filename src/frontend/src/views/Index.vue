@@ -49,153 +49,40 @@
       <link rel="stylesheet" href="css/style.min.css" />
       <title>V!U!E! Pizza - главная</title>
     </head>
-    <body>
-      <header class="header">
-        <div class="header__logo">
-          <a href="index.html" class="logo">
-            <img
-              src="img/logo.svg"
-              alt="V!U!E! Pizza logo"
-              width="90"
-              height="40"
-            />
-          </a>
-        </div>
-        <div class="header__cart">
-          <a href="cart.html">0 ₽</a>
-        </div>
-        <div class="header__user">
-          <a href="#" class="header__login"><span>Войти</span></a>
-        </div>
-      </header>
-
+    <AppLayout>
+      <template #header>
+        <Header :cartPrice="pizza.price" />
+      </template>
       <main class="content">
         <form action="#" method="post">
           <div class="content__wrapper">
             <h1 class="title title--big">Конструктор пиццы</h1>
 
             <div class="content__dough">
-              <div class="sheet">
-                <h2 class="title title--small sheet__title">Выберите тесто</h2>
-
-                <div class="sheet__content dough">
-                  <label
-                    v-for="(dough, index) in pizza.dough"
-                    :key="dough.id"
-                    class="dough__input"
-                    :class="
-                      dough.name == 'Тонкое'
-                        ? 'dough__input--light'
-                        : 'dough__input--large'
-                    "
-                  >
-                    <input
-                      type="radio"
-                      name="dought"
-                      :value="dough.name == 'Тонкое' ? 'light' : 'large'"
-                      class="visually-hidden"
-                      :checked="index == 0"
-                    />
-                    <b>{{ dough.name }}</b>
-                    <span>{{ dough.description }}</span>
-                  </label>
-                </div>
-              </div>
+              <BuilderDoughSelector
+                :dough="staticPizza.dough"
+                @doughChanged="updatePizzaComponents({ dough: $event })"
+              />
             </div>
 
             <div class="content__diameter">
-              <div class="sheet">
-                <h2 class="title title--small sheet__title">Выберите размер</h2>
-
-                <div class="sheet__content diameter">
-                  <label
-                    v-for="(size, index) in pizza.sizes"
-                    :key="size.id"
-                    class="diameter__input"
-                    :class="'diameter__input--' + pizzaSizeMap[size.multiplier]"
-                  >
-                    <input
-                      type="radio"
-                      name="diameter"
-                      :value="pizzaSizeMap[size.multiplier]"
-                      class="visually-hidden"
-                      :checked="index == 0"
-                    />
-                    <span>{{ size.name }}</span>
-                  </label>
-                </div>
-              </div>
+              <BuilderSizeSelector
+                :sizes="staticPizza.sizes"
+                @sizeChanged="updatePizzaComponents({ size: $event })"
+              />
             </div>
 
             <div class="content__ingredients">
-              <div class="sheet">
-                <h2 class="title title--small sheet__title">
-                  Выберите ингредиенты
-                </h2>
-
-                <div class="sheet__content ingredients">
-                  <div class="ingredients__sauce">
-                    <p>Основной соус:</p>
-
-                    <label
-                      v-for="(sauce, index) in pizza.sauces"
-                      :key="sauce.id"
-                      class="radio ingredients__input"
-                    >
-                      <input
-                        type="radio"
-                        name="sauce"
-                        :value="pizzaSauceMap[sauce.name]"
-                        :checked="index == 0"
-                      />
-                      <span>{{ sauce.name }}</span>
-                    </label>
-                  </div>
-
-                  <div class="ingredients__filling">
-                    <p>Начинка:</p>
-
-                    <ul class="ingredients__list">
-                      <li
-                        v-for="ingredient in pizza.ingredients"
-                        :key="ingredient.id"
-                        class="ingredients__item"
-                      >
-                        <span
-                          class="filling"
-                          :class="'filling--' + ingredientsMap[ingredient.name]"
-                        >
-                          {{ ingredient.name }}</span
-                        >
-
-                        <div
-                          class="counter counter--orange ingredients__counter"
-                        >
-                          <button
-                            type="button"
-                            class="counter__button counter__button--minus"
-                            disabled
-                          >
-                            <span class="visually-hidden">Меньше</span>
-                          </button>
-                          <input
-                            type="text"
-                            name="counter"
-                            class="counter__input"
-                            value="0"
-                          />
-                          <button
-                            type="button"
-                            class="counter__button counter__button--plus"
-                          >
-                            <span class="visually-hidden">Больше</span>
-                          </button>
-                        </div>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
+              <BuilderIngredientsSelector
+                :filling="{
+                  sauces: staticPizza.sauces,
+                  ingredients: staticPizza.ingredients,
+                }"
+                :ingredientsMap="ingredientsMap"
+                :sauceMap="sauceMap"
+                @ingredientChange="updatePizzaComponents($event)"
+                @sauceChange="updatePizzaComponents({ sauce: $event })"
+              />
             </div>
 
             <div class="content__pizza">
@@ -205,46 +92,49 @@
                   type="text"
                   name="pizza_name"
                   placeholder="Введите название пиццы"
+                  :value="pizza.name"
+                  @input="pizza.name = $event.target.value"
+                  required
                 />
               </label>
 
               <div class="content__constructor">
-                <div class="pizza pizza--foundation--big-tomato">
-                  <div class="pizza__wrapper">
-                    <div class="pizza__filling pizza__filling--ananas"></div>
-                    <div class="pizza__filling pizza__filling--bacon"></div>
-                    <div class="pizza__filling pizza__filling--cheddar"></div>
-                  </div>
-                </div>
+                <BuilderPizzaView
+                  :components="pizza.components"
+                  :ingredientsMap="ingredientsMap"
+                  :sauceMap="sauceMap"
+                  :doughMap="doughMap"
+                  :staticPizza="staticPizza"
+                />
               </div>
 
               <div class="content__result">
-                <p>Итого: 0 ₽</p>
-                <button type="button" class="button" disabled>Готовьте!</button>
+                <BuilderPriceCounter :price="pizza.price" />
+                <button type="button" class="button" :disabled="!isReadyToCook">
+                  Готовьте!
+                </button>
               </div>
             </div>
           </div>
         </form>
       </main>
-    </body>
+    </AppLayout>
   </html>
 </template>
 
 <script>
-import misc from "@/static/misc.json";
-import pizza from "@/static/pizza.json";
-import user from "@/static/user.json";
+import staticMisc from "@/static/misc.json";
+import staticPizza from "@/static/pizza.json";
+import staticUser from "@/static/user.json";
 
-const pizzaSauceMap = {
-  Томатный: "tomato",
-  Сливочный: "creamy",
-};
-
-const pizzaSizeMap = {
-  1: "small",
-  2: "normal",
-  3: "big",
-};
+// Modules
+import BuilderDoughSelector from "@/modules/builder/components/BuilderDoughSelector";
+import BuilderIngredientsSelector from "@/modules/builder/components/BuilderIngredientsSelector";
+import BuilderPizzaView from "@/modules/builder/components/BuilderPizzaView";
+import BuilderPriceCounter from "@/modules/builder/components/BuilderPriceCounter";
+import BuilderSizeSelector from "@/modules/builder/components/BuilderSizeSelector";
+import AppLayout from "../layouts/AppLayout.vue";
+import Header from "../modules/Header.vue";
 
 const ingredientsMap = {
   Грибы: "mushrooms",
@@ -264,17 +154,131 @@ const ingredientsMap = {
   "Блю чиз": "blue_cheese",
 };
 
+const sauceMap = {
+  Томатный: "tomato",
+  Сливочный: "creamy",
+};
+
+const doughMap = {
+  Толстое: "big",
+  Тонкое: "small",
+};
+
 export default {
   name: "IndexComponent",
+  components: {
+    BuilderSizeSelector,
+    BuilderDoughSelector,
+    BuilderIngredientsSelector,
+    BuilderPizzaView,
+    BuilderPriceCounter,
+    AppLayout,
+    Header,
+  },
   data() {
     return {
-      misc,
-      pizza,
-      user,
-      pizzaSauceMap,
-      pizzaSizeMap,
+      staticMisc,
+      staticPizza,
+      staticUser,
       ingredientsMap,
+      sauceMap,
+      doughMap,
+      isReadyToCook: false,
+      pizza: {
+        name: undefined,
+        components: { dough: {}, ingredients: {}, size: {}, sauce: {} },
+        price: 0,
+      },
     };
+  },
+  methods: {
+    updatePizzaComponents: function (data) {
+      return Object.assign(this.pizza.components, data);
+    },
+    countPizzaPrice: function () {
+      let pizza = this.pizza;
+      let staticPizza = this.staticPizza;
+      let multiplier = 1;
+      let doughPrice = 0;
+      let saucePrice = 0;
+      let pizzaIngredients = pizza.components.ingredients;
+      let staticIngredients = staticPizza.ingredients;
+      let ingredientsPrice = 0;
+
+      // count DOUGH price
+      staticPizza.dough.forEach((dough) =>
+        dough.id == pizza.components.dough ? (doughPrice = dough.price) : null
+      );
+
+      // count SAUCE price
+      staticPizza.sauces.forEach((sauce) =>
+        sauce.id == pizza.components.sauce ? (saucePrice = sauce.price) : null
+      );
+
+      // count MULTIPLIER
+      staticPizza.sizes.forEach((size) =>
+        size.id == pizza.components.size ? (multiplier = size.multiplier) : null
+      );
+
+      // count DOUGH price
+      if (Object.keys(pizzaIngredients).length > 0) {
+        Object.keys(pizzaIngredients).forEach((ingredient) => {
+          Object.keys(staticIngredients).forEach((staticKey) => {
+            let staticIngredient = staticIngredients[staticKey];
+            if (ingredient == staticIngredient.id) {
+              ingredientsPrice +=
+                pizzaIngredients[ingredient] * staticIngredient.price;
+            }
+          });
+        });
+      }
+
+      let totalPrice =
+        (doughPrice + ingredientsPrice + saucePrice) * multiplier;
+      return (this.pizza.price = totalPrice);
+    },
+    checkPizzaReady: function () {
+      let isEnoughComponents;
+      Object.keys(this.pizza.components).forEach((key) => {
+        let item = this.pizza.components[key];
+        if (isEnoughComponents != false) {
+          if (typeof item === "string") {
+            isEnoughComponents = item.trim().length > 0;
+          } else if (typeof item === "object") {
+            isEnoughComponents = Object.keys(item).length > 0;
+          } else if (Array.isArray(item)) {
+            isEnoughComponents = item.length > 0;
+          } else if (typeof item === "number") {
+            isEnoughComponents = item > 0;
+          }
+        }
+      });
+      return (this.isReadyToCook =
+        (this.pizza.name == undefined ? false : this.pizza.name.length > 0) &&
+        isEnoughComponents);
+    },
+  },
+  watch: {
+    pizza: {
+      handler: function () {
+        return this.countPizzaPrice();
+      },
+      deep: true,
+      immediate: true,
+    },
+    "pizza.name": {
+      handler: function () {
+        return this.checkPizzaReady();
+      },
+      immediate: true,
+    },
+    "pizza.components": {
+      handler: function () {
+        return this.checkPizzaReady();
+      },
+      deep: true,
+      immediate: true,
+    },
   },
 };
 </script>
