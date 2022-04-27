@@ -3,15 +3,21 @@
     <button
       type="button"
       class="counter__button counter__button--minus"
-      disabled
+      :disabled="decreaseDisabled"
       @click="decreaseHandler"
     >
       <span class="visually-hidden">Меньше</span>
     </button>
-    <input type="text" name="counter" class="counter__input" :value="value" />
+    <input
+      type="text"
+      name="counter"
+      class="counter__input"
+      :value="counterValue"
+    />
     <button
       type="button"
       class="counter__button counter__button--plus"
+      :disabled="increaseDisabled"
       @click="increaseHandler"
     >
       <span class="visually-hidden">Больше</span>
@@ -53,7 +59,6 @@ export default {
       },
       set: function (v) {
         if (0 <= v && v <= this.maxValue) {
-          this.$el.querySelector(".counter__input").value = v;
           return (this.counterValue = v);
         }
       },
@@ -64,6 +69,12 @@ export default {
     decrementButton: function () {
       return this.$el.querySelector(".counter__button--minus");
     },
+    increaseDisabled: function () {
+      return this.counterValue == this.maxValue;
+    },
+    decreaseDisabled: function () {
+      return this.counterValue == 0;
+    },
   },
   methods: {
     increaseHandler: function () {
@@ -71,25 +82,11 @@ export default {
     },
     decreaseHandler: function () {
       this.counter--;
-      this.incrementButton.removeAttribute("disabled");
-    },
-    valueWatcher: function () {
-      this.counterValue == this.maxValue
-        ? this.incrementButton.setAttribute("disabled", true)
-        : this.decrementButton.removeAttribute("disabled");
-      this.counterValue == 0
-        ? this.decrementButton.setAttribute("disabled", true)
-        : false;
-      this.$emit("valueChange", this.counterValue);
     },
   },
   watch: {
     counterValue: function () {
-      this.valueWatcher();
-    },
-    value: function () {
-      this.counter = this.value;
-      this.valueWatcher();
+      this.$emit("valueChange", this.counterValue);
     },
   },
 };
