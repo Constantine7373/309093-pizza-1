@@ -4,15 +4,11 @@
 
     <div class="sheet__content dough">
       <SelectorItem
-        v-for="(dough, index) in dough"
+        v-for="dough in dough"
         :key="dough.id"
-        :className="
-          dough.name == 'Тонкое'
-            ? 'dough__input dough__input--light'
-            : 'dough__input dough__input--large'
-        "
-        :name="'dough'"
-        :isChecked="index == 0"
+        :className="doughName(dough.name)"
+        name="dough"
+        :isChecked="activeDough == dough.id"
         :value="dough.id"
         @change="onDoughChange($event)"
       >
@@ -38,10 +34,19 @@ export default {
       required: true,
       validator: (v) => v.length,
     },
+    activeDough: {
+      type: Number,
+      required: true,
+    },
   },
   methods: {
     onDoughChange: function (v) {
       return this.$emit("doughChanged", v);
+    },
+    doughName: function (name) {
+      return name == "Тонкое"
+        ? "dough__input dough__input--light"
+        : "dough__input dough__input--large";
     },
   },
 };

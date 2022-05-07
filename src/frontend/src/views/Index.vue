@@ -1,125 +1,79 @@
 <template>
-  <!DOCTYPE html>
-  <html lang="ru">
-    <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <link
-        rel="preload"
-        href="fonts/roboto-bold.woff2"
-        as="font"
-        type="font/woff2"
-        crossorigin="anonymous"
-      />
-      <link
-        rel="preload"
-        href="fonts/roboto-regular.woff2"
-        as="font"
-        type="font/woff2"
-        crossorigin="anonymous"
-      />
-      <link
-        rel="preload"
-        href="fonts/roboto-light.woff2"
-        as="font"
-        type="font/woff2"
-        crossorigin="anonymous"
-      />
-      <link
-        rel="preload"
-        href="fonts/roboto-bold.woff"
-        as="font"
-        type="font/woff"
-        crossorigin="anonymous"
-      />
-      <link
-        rel="preload"
-        href="fonts/roboto-regular.woff"
-        as="font"
-        type="font/woff"
-        crossorigin="anonymous"
-      />
-      <link
-        rel="preload"
-        href="fonts/roboto-light.woff"
-        as="font"
-        type="font/woff"
-        crossorigin="anonymous"
-      />
-      <link rel="stylesheet" href="css/style.min.css" />
-      <title>V!U!E! Pizza - главная</title>
-    </head>
-    <AppLayout>
-      <template #header>
-        <Header :cartPrice="pizza.price" />
-      </template>
-      <main class="content">
-        <form action="#" method="post">
-          <div class="content__wrapper">
-            <h1 class="title title--big">Конструктор пиццы</h1>
+  <AppLayout>
+    <template #header>
+      <Header :cartPrice="pizzaPrice" />
+    </template>
+    <main class="content">
+      <form action="#" method="post">
+        <div class="content__wrapper">
+          <h1 class="title title--big">Конструктор пиццы</h1>
 
-            <div class="content__dough">
-              <BuilderDoughSelector
-                :dough="staticPizza.dough"
-                @doughChanged="updatePizzaComponents({ dough: $event })"
+          <div class="content__dough">
+            <BuilderDoughSelector
+              :dough="staticPizza.dough"
+              :activeDough="pizza.components.dough"
+              @doughChanged="updatePizzaComponents({ dough: $event })"
+            />
+          </div>
+
+          <div class="content__diameter">
+            <BuilderSizeSelector
+              :sizes="staticPizza.sizes"
+              :activeSize="pizza.components.size"
+              @sizeChanged="updatePizzaComponents({ size: $event })"
+            />
+          </div>
+
+          <div class="content__ingredients">
+            <BuilderIngredientsSelector
+              :filling="{
+                sauces: staticPizza.sauces,
+                ingredients: staticPizza.ingredients,
+              }"
+              :ingredientsMap="ingredientsMap"
+              :sauceMap="sauceMap"
+              :activeSauce="pizza.components.sauce"
+              :pizzaIngredients="pizza.components.ingredients"
+              :ingredientsMaxValue="3"
+              @ingredientChange="updatePizzaComponents({ ingredients: $event })"
+              @sauceChange="updatePizzaComponents({ sauce: $event })"
+            />
+          </div>
+
+          <div class="content__pizza">
+            <label class="input">
+              <span class="visually-hidden">Название пиццы</span>
+              <input
+                type="text"
+                name="pizza_name"
+                placeholder="Введите название пиццы"
+                :value="pizza.name"
+                @input="pizza.name = $event.target.value"
+                required
               />
-            </div>
+            </label>
 
-            <div class="content__diameter">
-              <BuilderSizeSelector
-                :sizes="staticPizza.sizes"
-                @sizeChanged="updatePizzaComponents({ size: $event })"
-              />
-            </div>
-
-            <div class="content__ingredients">
-              <BuilderIngredientsSelector
-                :filling="{
-                  sauces: staticPizza.sauces,
-                  ingredients: staticPizza.ingredients,
-                }"
+            <div class="content__constructor">
+              <BuilderPizzaView
+                :components="pizza.components"
                 :ingredientsMap="ingredientsMap"
                 :sauceMap="sauceMap"
-                @ingredientChange="updatePizzaComponents($event)"
-                @sauceChange="updatePizzaComponents({ sauce: $event })"
+                :doughMap="doughMap"
+                :staticPizza="staticPizza"
               />
             </div>
 
-            <div class="content__pizza">
-              <label class="input">
-                <span class="visually-hidden">Название пиццы</span>
-                <input
-                  type="text"
-                  name="pizza_name"
-                  placeholder="Введите название пиццы"
-                  :value="pizza.name"
-                  @input="pizza.name = $event.target.value"
-                  required
-                />
-              </label>
-
-              <div class="content__constructor">
-                <BuilderPizzaView
-                  :components="pizza.components"
-                  :ingredientsMap="ingredientsMap"
-                  :sauceMap="sauceMap"
-                  :doughMap="doughMap"
-                  :staticPizza="staticPizza"
-                />
-              </div>
-
-              <div class="content__result">
-                <BuilderPriceCounter :price="pizza.price" />
-                <button type="button" class="button" :disabled="!isReadyToCook">
-                  Готовьте!
-                </button>
-              </div>
+            <div class="content__result">
+              <BuilderPriceCounter :price="pizzaPrice" />
+              <button type="button" class="button" :disabled="!isReadyToCook">
+                Готовьте!
+              </button>
             </div>
           </div>
-        </form>
-      </main>
-    </AppLayout>
-  </html>
+        </div>
+      </form>
+    </main>
+  </AppLayout>
 </template>
 
 <script>
@@ -183,61 +137,68 @@ export default {
       ingredientsMap,
       sauceMap,
       doughMap,
-      isReadyToCook: false,
       pizza: {
         name: undefined,
-        components: { dough: {}, ingredients: {}, size: {}, sauce: {} },
-        price: 0,
+        components: { dough: 1, ingredients: {}, size: 1, sauce: 1 },
       },
     };
   },
-  methods: {
-    updatePizzaComponents: function (data) {
-      return Object.assign(this.pizza.components, data);
+  computed: {
+    doughPrice: function () {
+      let component = this.pizza.components.dough;
+      let price;
+      this.staticPizza.dough.forEach((dough) => {
+        if (dough.id == component) {
+          price = dough.price;
+        }
+      });
+      return price;
     },
-    countPizzaPrice: function () {
-      let pizza = this.pizza;
-      let staticPizza = this.staticPizza;
-      let multiplier = 1;
-      let doughPrice = 0;
-      let saucePrice = 0;
-      let pizzaIngredients = pizza.components.ingredients;
-      let staticIngredients = staticPizza.ingredients;
+    saucePrice: function () {
+      let component = this.pizza.components.sauce;
+      let price;
+      this.staticPizza.sauces.forEach((sauce) => {
+        if (sauce.id == component) {
+          price = sauce.price;
+        }
+      });
+      return price;
+    },
+    multiplier: function () {
+      let component = this.pizza.components.size;
+      let price;
+      this.staticPizza.sizes.forEach((size) => {
+        if (size.id == component) {
+          price = size.multiplier;
+        }
+      });
+      return price;
+    },
+    ingredientsPrice: function () {
+      let ingredients = this.pizza.components.ingredients;
       let ingredientsPrice = 0;
-
-      // count DOUGH price
-      staticPizza.dough.forEach((dough) =>
-        dough.id == pizza.components.dough ? (doughPrice = dough.price) : null
-      );
-
-      // count SAUCE price
-      staticPizza.sauces.forEach((sauce) =>
-        sauce.id == pizza.components.sauce ? (saucePrice = sauce.price) : null
-      );
-
-      // count MULTIPLIER
-      staticPizza.sizes.forEach((size) =>
-        size.id == pizza.components.size ? (multiplier = size.multiplier) : null
-      );
-
-      // count DOUGH price
-      if (Object.keys(pizzaIngredients).length > 0) {
-        Object.keys(pizzaIngredients).forEach((ingredient) => {
-          Object.keys(staticIngredients).forEach((staticKey) => {
-            let staticIngredient = staticIngredients[staticKey];
-            if (ingredient == staticIngredient.id) {
-              ingredientsPrice +=
-                pizzaIngredients[ingredient] * staticIngredient.price;
+      if (Object.keys(ingredients).length > 0) {
+        Object.keys(this.pizza.components.ingredients).forEach((ingredient) => {
+          Object.keys(this.staticPizza.ingredients).forEach(
+            (staticIngredient) => {
+              if (ingredient == staticIngredient) {
+                ingredientsPrice +=
+                  ingredients[ingredient] *
+                  this.staticPizza.ingredients[staticIngredient].price;
+              }
             }
-          });
+          );
         });
       }
-
-      let totalPrice =
-        (doughPrice + ingredientsPrice + saucePrice) * multiplier;
-      return (this.pizza.price = totalPrice);
+      return ingredientsPrice;
     },
-    checkPizzaReady: function () {
+    pizzaPrice: function () {
+      return (
+        (this.doughPrice + this.ingredientsPrice + this.saucePrice) *
+        this.multiplier
+      );
+    },
+    isReadyToCook: function () {
       let isEnoughComponents;
       Object.keys(this.pizza.components).forEach((key) => {
         let item = this.pizza.components[key];
@@ -253,31 +214,24 @@ export default {
           }
         }
       });
-      return (this.isReadyToCook =
+      return (
         (this.pizza.name == undefined ? false : this.pizza.name.length > 0) &&
-        isEnoughComponents);
+        isEnoughComponents
+      );
     },
   },
-  watch: {
-    pizza: {
-      handler: function () {
-        return this.countPizzaPrice();
-      },
-      deep: true,
-      immediate: true,
-    },
-    "pizza.name": {
-      handler: function () {
-        return this.checkPizzaReady();
-      },
-      immediate: true,
-    },
-    "pizza.components": {
-      handler: function () {
-        return this.checkPizzaReady();
-      },
-      deep: true,
-      immediate: true,
+  methods: {
+    updatePizzaComponents: function (data) {
+      // удаляем нулевые значения ингредиентов \ добавляем реактивные ненулевые
+      if (data["ingredients"]) {
+        for (let id in data["ingredients"]) {
+          let value = data["ingredients"][id];
+          return value == 0
+            ? this.$delete(this.pizza.components.ingredients, id)
+            : this.$set(this.pizza.components.ingredients, id, value);
+        }
+      }
+      return Object.assign(this.pizza.components, data);
     },
   },
 };

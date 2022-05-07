@@ -26,6 +26,10 @@ export default {
           : console.error("draggable parameter must be a class selector");
       },
     },
+    dragDisabled: {
+      type: Boolean,
+      default: false,
+    },
   },
   computed: {
     itemToDrag: function () {
@@ -33,6 +37,9 @@ export default {
         this.dragClass !== null
           ? this.$el.querySelector(this.dragClass)
           : this.$el;
+      this.dragDisabled
+        ? (item.style.cursor = "no-drop")
+        : (item.style.cursor = null);
       return item;
     },
     itemToDrop: function () {
@@ -44,8 +51,10 @@ export default {
   },
   methods: {
     setDraggable: function () {
-      this.itemToDrag.setAttribute("draggable", true);
-      this.itemToDrag.addEventListener("dragstart", this.onDragStart);
+      if (!this.dragDisabled) {
+        this.itemToDrag.setAttribute("draggable", true);
+        this.itemToDrag.addEventListener("dragstart", this.onDragStart);
+      }
     },
     unsetDraggable: function () {
       this.itemToDrag.removeAttribute("draggable");

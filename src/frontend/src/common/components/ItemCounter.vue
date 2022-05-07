@@ -8,12 +8,7 @@
     >
       <span class="visually-hidden">Меньше</span>
     </button>
-    <input
-      type="text"
-      name="counter"
-      class="counter__input"
-      :value="counterValue"
-    />
+    <input type="text" name="counter" class="counter__input" :value="value" />
     <button
       type="button"
       class="counter__button counter__button--plus"
@@ -33,10 +28,6 @@ export default {
       type: String,
       required: false,
     },
-    counterId: {
-      type: Number,
-      required: true,
-    },
     value: {
       type: Number,
       default: 0,
@@ -47,22 +38,7 @@ export default {
       default: Infinity,
     },
   },
-  data() {
-    return {
-      counterValue: this.value,
-    };
-  },
   computed: {
-    counter: {
-      get: function () {
-        return this.counterValue;
-      },
-      set: function (v) {
-        if (0 <= v && v <= this.maxValue) {
-          return (this.counterValue = v);
-        }
-      },
-    },
     incrementButton: function () {
       return this.$el.querySelector(".counter__button--plus");
     },
@@ -70,23 +46,18 @@ export default {
       return this.$el.querySelector(".counter__button--minus");
     },
     increaseDisabled: function () {
-      return this.counterValue == this.maxValue;
+      return this.value == this.maxValue;
     },
     decreaseDisabled: function () {
-      return this.counterValue == 0;
+      return this.value == 0;
     },
   },
   methods: {
     increaseHandler: function () {
-      this.counter++;
+      this.$emit("valueChange", this.value + 1);
     },
     decreaseHandler: function () {
-      this.counter--;
-    },
-  },
-  watch: {
-    counterValue: function () {
-      this.$emit("valueChange", this.counterValue);
+      this.$emit("valueChange", this.value - 1);
     },
   },
 };

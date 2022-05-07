@@ -6,11 +6,11 @@
       <div class="ingredients__sauce">
         <p>Основной соус:</p>
         <RadioButton
-          v-for="(sauce, index) in filling.sauces"
+          v-for="sauce in filling.sauces"
           :key="sauce.id"
           :name="'sauce'"
           :value="sauce.id"
-          :isChecked="index == 0"
+          :isChecked="activeSauce == sauce.id"
           :textValue="sauce.name"
           @change="onSauceChange($event)"
         />
@@ -28,6 +28,9 @@
             <draggable
               :dragClass="'.filling'"
               :dropClass="'.pizza'"
+              :dragDisabled="
+                pizzaIngredients[ingredient.id] == ingredientsMaxValue
+              "
               @drop="onFillingDrop(ingredient.id)"
             >
               <span
@@ -38,9 +41,12 @@
               >
               <ItemCounter
                 :className="'ingredients__counter'"
-                :maxValue="3"
-                :counterId="ingredient.id"
-                :value="ingredients[ingredient.id]"
+                :maxValue="ingredientsMaxValue"
+                :value="
+                  pizzaIngredients.hasOwnProperty(ingredient.id)
+                    ? pizzaIngredients[ingredient.id]
+                    : 0
+                "
                 @valueChange="onIngredientChange(ingredient.id, $event)"
               />
             </draggable>
@@ -78,31 +84,29 @@ export default {
       type: Object,
       required: true,
     },
-  },
-  data() {
-    return {
-      ingredients: {},
-    };
-  },
-  watch: {
-    ingredients: {
-      handler: function () {
-        this.$emit("ingredientChange", { ingredients: this.ingredients });
-      },
-      deep: true,
+    activeSauce: {
+      type: Number,
+      required: true,
+    },
+    pizzaIngredients: {
+      type: Object,
+      required: true,
+    },
+    ingredientsMaxValue: {
+      type: Number,
+      default: 0,
     },
   },
   methods: {
     onIngredientChange: function (id, value) {
-      value == 0
-        ? this.$delete(this.ingredients, id)
-        : this.$set(this.ingredients, id, value);
+      this.$emit("ingredientChange", { [id]: value });
     },
     onSauceChange: function (v) {
       return this.$emit("sauceChange", v);
     },
     onFillingDrop: function (id) {
-      let value = this.ingredients[id] === undefined ? 0 : this.ingredients[id];
+      let value =
+        this.pizzaIngredients[id] === undefined ? 0 : this.pizzaIngredients[id];
       value++;
       return this.onIngredientChange(id, value);
     },

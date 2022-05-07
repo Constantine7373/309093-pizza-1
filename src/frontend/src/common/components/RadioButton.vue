@@ -37,19 +37,6 @@ export default {
       required: false,
     },
   },
-  data() {
-    return {
-      defaultValue: this.isChecked ? this.value : null,
-    };
-  },
-  watch: {
-    defaultValue: {
-      handler: function () {
-        return this.isChecked ? this.$emit("change", this.value) : null;
-      },
-      immediate: true,
-    },
-  },
   methods: {
     onChange: function () {
       return this.$emit("change", this.value);

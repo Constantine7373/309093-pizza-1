@@ -4,14 +4,14 @@
 
     <div class="sheet__content diameter">
       <SelectorItem
-        v-for="(size, index) in sizes"
+        v-for="size in sizes"
         :key="size.id"
         :class="
           'diameter__input diameter__input--' + pizzaSizeMap[size.multiplier]
         "
         :name="'diameter'"
         :value="size.multiplier"
-        :isChecked="index == 0"
+        :isChecked="activeSize == size.id"
         @change="onSizeChange($event)"
       >
         <span>{{ size.name }}</span>
@@ -40,6 +40,10 @@ export default {
       type: Array,
       required: true,
       validator: (v) => v.length,
+    },
+    activeSize: {
+      type: Number,
+      required: true,
     },
   },
   data() {
