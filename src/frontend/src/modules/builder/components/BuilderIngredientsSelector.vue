@@ -105,6 +105,7 @@ export default {
       return this.$emit("sauceChange", v);
     },
     onFillingDrop: function (id) {
+      console.log(id);
       let value =
         this.pizzaIngredients[id] === undefined ? 0 : this.pizzaIngredients[id];
       value++;

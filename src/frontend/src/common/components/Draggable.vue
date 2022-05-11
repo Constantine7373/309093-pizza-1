@@ -31,15 +31,20 @@ export default {
       default: false,
     },
   },
+  watch: {
+    dragDisabled: function () {
+      let item = this.itemToDrag;
+      this.dragDisabled
+        ? (item.style.cursor = "no-drop")
+        : (item.style.cursor = null);
+    },
+  },
   computed: {
     itemToDrag: function () {
       let item =
         this.dragClass !== null
           ? this.$el.querySelector(this.dragClass)
           : this.$el;
-      this.dragDisabled
-        ? (item.style.cursor = "no-drop")
-        : (item.style.cursor = null);
       return item;
     },
     itemToDrop: function () {
@@ -71,6 +76,7 @@ export default {
     onDrop: function (e) {
       e.preventDefault();
       this.$emit("drop", { dropTarget: this.itemToDrop });
+      this.itemToDrop.removeEventListener("drop", this.onDrop);
     },
   },
 };

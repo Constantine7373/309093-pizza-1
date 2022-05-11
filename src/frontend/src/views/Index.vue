@@ -231,7 +231,7 @@ export default {
             : this.$set(this.pizza.components.ingredients, id, value);
         }
       }
-      return Object.assign(this.pizza.components, data);
+      Object.assign(this.pizza.components, data);
     },
   },
 };
