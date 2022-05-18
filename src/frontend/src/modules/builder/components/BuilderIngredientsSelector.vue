@@ -99,10 +99,10 @@ export default {
   },
   methods: {
     onIngredientChange: function (id, value) {
-      this.$emit("ingredientChange", { [id]: value });
+      this.$emit("ingredientChanged", { [id]: value });
     },
     onSauceChange: function (v) {
-      return this.$emit("sauceChange", v);
+      return this.$emit("sauceChanged", v);
     },
     onFillingDrop: function (id) {
       console.log(id);
