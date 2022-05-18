@@ -30,9 +30,9 @@
             :sauceMap="sauceMap"
             :activeSauce="pizza.components.sauce"
             :pizzaIngredients="pizza.components.ingredients"
-            :ingredientsMaxValue="3"
-            @ingredientChange="updatePizzaComponents({ ingredients: $event })"
-            @sauceChange="updatePizzaComponents({ sauce: $event })"
+            :ingredientsMaxValue="ingredientsMaxValue"
+            @ingredientChanged="updatePizzaComponents({ ingredients: $event })"
+            @sauceChanged="updatePizzaComponents({ sauce: $event })"
           />
         </div>
 
@@ -43,8 +43,7 @@
               type="text"
               name="pizza_name"
               placeholder="Введите название пиццы"
-              :value="pizza.name"
-              @input="pizza.name = $event.target.value"
+              v-model="pizzaName"
               required
             />
           </label>
@@ -111,6 +110,8 @@ const doughMap = {
   Тонкое: "small",
 };
 
+const ingredientsMaxValue = 3;
+
 export default {
   name: "IndexComponent",
   components: {
@@ -126,6 +127,7 @@ export default {
       staticPizza,
       staticUser,
       ingredientsMap,
+      ingredientsMaxValue,
       sauceMap,
       doughMap,
       pizza: {
@@ -135,6 +137,14 @@ export default {
     };
   },
   computed: {
+    pizzaName: {
+      get() {
+        return this.pizza.name;
+      },
+      set(v) {
+        v == "" ? (this.pizza.name = undefined) : (this.pizza.name = v);
+      },
+    },
     doughPrice: function () {
       let component = this.pizza.components.dough;
       let price;
